@@ -36,6 +36,7 @@ export default defineConfig({
         text: '进阶',
         items: [
           { text: '关键指标解读', link: '/guide/metrics' },
+          { text: '完整代码与脚本', link: '/guide/code' },
           { text: '常见问题', link: '/guide/faq' }
         ]
       }
