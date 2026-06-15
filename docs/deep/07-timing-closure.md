@@ -251,12 +251,17 @@ Hold Slack = T_data_arrival - (T_clk + T_skew) + T_hold_library
 
 ### 时钟不确定性
 
-```
-T_effective = T_period - T_uncertainty - T_jitter
+::: warning 假设性示例
+GCD 的实际 SDC 中没有 `set_clock_uncertainty`。以下仅为说明概念：
 
-SDC 中：set_clock_uncertainty 0.5 [get_clocks clk]
-有效时钟周期 = 0.46 - 0.5 = -0.04 ns（太紧了！）
+```tcl
+# 假设添加时钟不确定性
+set_clock_uncertainty 0.5 [get_clocks clk]
+# 有效时钟周期 = 0.46 - 0.5 = -0.04 ns（太紧了！）
 ```
+
+实际项目中，时钟不确定性通常为时钟周期的 5%-10%。
+:::
 
 ## 关键洞察
 

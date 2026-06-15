@@ -24,19 +24,41 @@
 GCD 是小设计，使用专门定制的 PDN 脚本：
 
 ```tcl
-# grid_strategy-M1-M4-M7.tcl
-# M4 纵向条带
-define_pdn_grid -name grid -pins {metal4}
-add_pdn_stripe -grid grid -layer metal4 \
-    -width 0.24 -pitch 14.0 -offset 1
+# grid_strategy-M1-M4-M7.tcl（完整内容）
 
-# M7 横向条带
-add_pdn_stripe -grid grid -layer metal7 \
-    -width 0.70 -pitch 8.0 -offset 1
+# 全局连接：将所有单元的电源/地引脚连接到 VDD/VSS 网络
+add_global_connection -net {VDD} -inst_pattern {.*} -pin_pattern {^VDD$} -power
+add_global_connection -net {VDD} -inst_pattern {.*} -pin_pattern {^VDDPE$}
+add_global_connection -net {VDD} -inst_pattern {.*} -pin_pattern {^VDDCE$}
+add_global_connection -net {VSS} -inst_pattern {.*} -pin_pattern {^VSS$} -ground
+add_global_connection -net {VSS} -inst_pattern {.*} -pin_pattern {^VSSE$}
+global_connect
 
-# 连接
-add_pdn_connect -grid grid -layers {metal4 metal7}
+# 电压域定义
+set_voltage_domain -name {CORE} -power {VDD} -ground {VSS}
+
+# 标准单元电源网格
+define_pdn_grid -name {grid} -voltage_domains {CORE}
+
+# M1：跟随标准单元的电源轨（VDD/VSS stripe）
+add_pdn_stripe -grid {grid} -layer {metal1} -width {0.17} -pitch {2.4} -offset {0} -followpins
+
+# M4：纵向条带
+add_pdn_stripe -grid {grid} -layer {metal4} -width {0.48} -pitch {28.0} -offset {2}
+
+# M7：横向条带
+add_pdn_stripe -grid {grid} -layer {metal7} -width {1.40} -pitch {15.0} -offset {2}
+
+# 层间连接
+add_pdn_connect -grid {grid} -layers {metal1 metal4}
+add_pdn_connect -grid {grid} -layers {metal4 metal7}
 ```
+
+PDN 结构：
+- **M1**：紧贴标准单元的电源/地轨（followpins），宽度 0.17 μm
+- **M4**：纵向电源条带，宽度 0.48 μm，间距 28.0 μm
+- **M7**：横向电源条带，宽度 1.40 μm，间距 15.0 μm
+- **连接**：M1↔M4 通过 via，M4↔M7 通过 via
 
 ::: warning 小设计陷阱
 默认 PDN 配置的条带宽度对小设计来说太宽，会导致 `[ERROR PDN-0185] Insufficient width`。GCD 使用了专门缩小的条带宽度。

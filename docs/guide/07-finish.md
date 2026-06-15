@@ -93,10 +93,16 @@ Total Power: 3.48 mW
 ### 单元统计
 
 ```
-Sequential cells:     35  (触发器)
-Combinational cells: 382  (逻辑门)
-Fill cells:          316  (填充单元)
-Tap cells:            48  (衬底连接)
+Sequential cells:           35  (触发器)
+Combinational cells:       382  (逻辑门)
+Clock buffer:                6  (时钟缓冲器)
+Timing Repair Buffer:      110  (时序修复缓冲器)
+Inverter:                   87  (反相器)
+Clock inverter:              2  (时钟反相器)
+Fill cells:                316  (填充单元)
+Tap cells:                  48  (衬底连接)
+─────────────────────────────
+Total:                     986
 ```
 
 ### DRC

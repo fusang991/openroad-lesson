@@ -17,8 +17,12 @@
 ```
 核心面积 = 标准单元总面积 / 目标利用率
 
-GCD：663 μm² / 0.55 = 1205 μm²（理论值）
-实际：884 μm²（利用率 76%，因为有填充和缓冲器）
+GCD 综合后：663 μm² / 0.55 ≈ 1205 μm²（布局规划时的理论估算）
+GCD 最终：884 μm²（实际面积，利用率 76%）
+
+差异原因：综合后 663 μm² 只含逻辑单元（521 个），
+最终 884 μm² 包含 CTS 缓冲器、timing repair、填充单元等（共 986 个）。
+布局规划器根据 55% 利用率和实际总单元面积计算核心区域。
 ```
 
 利用率（Utilization）的权衡：
@@ -88,14 +92,13 @@ openroad -no_init
 read_lef /OpenROAD-flow-scripts/flow/platforms/nangate45/lef/NangateOpenCellLibrary.macro.mod.lef
 read_db /work/results/nangate45/gcd/base/2_floorplan.odb
 
-# 查看核心区域
+# 查看核心区域和面积
 report_design_area
 
-# 查看 IO 端口
-report_io
-
-# 查看标准单元行
-report_row
+# 查看设计中的端口（通过 ODB 数据库）
+# 注意：OpenROAD 没有 report_io/report_row 命令
+# 查看 IO 信息可以在 DEF 文件中搜索 "PINS" 段
+# 查看 row 信息可以在 DEF 文件中搜索 "ROWS" 段
 ```
 
 ### 实验：改变利用率

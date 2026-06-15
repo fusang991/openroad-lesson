@@ -125,9 +125,11 @@ cat logs/nangate45/gcd/base/6_report.log | grep "Design area"
 | 最终（含填充/缓冲） | 884 μm² | 76% |
 
 面积增长 33%，来自：
-- 时钟树缓冲器（6 个 CLKBUF + 110 个 timing repair buffer）
+- 时钟树缓冲器（6 个 CLKBUF + 110 个 timing repair buffer + 87 个 inverter + 2 个 clock inverter）
 - 填充单元（316 个 filler）
 - Tap 单元（48 个）
+
+总计 986 个单元，比综合后的 521 个多出 465 个物理设计插入的单元。
 
 ## 数学模型：单元面积计算
 
@@ -135,11 +137,13 @@ cat logs/nangate45/gcd/base/6_report.log | grep "Design area"
 标准单元面积 = Σ (每个单元的宽度 × 高度)
 
 Nangate45 单元高度固定 = 1.4 μm
-NAND2_X1 宽度 = 0.94 μm → 面积 = 0.94 × 1.4 = 1.316 μm²
-DFF_X1 宽度 = 3.58 μm → 面积 = 3.58 × 1.4 = 5.012 μm²
+NAND2_X1 宽度 = 0.57 μm → 面积 = 0.57 × 1.4 = 0.798 μm²
+DFF_X1 宽度 = 3.23 μm → 面积 = 3.23 × 1.4 = 4.522 μm²
 ```
 
-GCD 综合后面积 663 μm² ÷ 单元高度 1.4 μm ≈ 474 μm 的总单元宽度。
+数据来源：`platforms/nangate45/lef/NangateOpenCellLibrary.macro.mod.lef` 中的 `SIZE` 字段。
+
+GCD 综合后面积 663 μm² 是所有标准单元面积之和（521 个单元）。
 
 ## 关键洞察
 

@@ -178,7 +178,8 @@ module GcdUnitDpathRTL (
   input  wire [15:0] req_msg_a, req_msg_b,
   output wire [15:0] resp_msg
 );
-  wire [15:0] a_reg_out, b_reg_out, sub_out;
+  reg [15:0] a_reg_out, b_reg_out;
+  wire [15:0] sub_out;
 
   // a 寄存器 + 3选1 Mux
   reg [15:0] a_mux_out;
@@ -192,7 +193,6 @@ module GcdUnitDpathRTL (
   end
   always @(posedge clk)
     if (a_reg_en) a_reg_out <= a_mux_out;
-  assign a_reg_out = a_reg_out;
 
   // b 寄存器 + 2选1 Mux
   reg [15:0] b_mux_out;
@@ -201,7 +201,6 @@ module GcdUnitDpathRTL (
   end
   always @(posedge clk)
     if (b_reg_en) b_reg_out <= b_mux_out;
-  assign b_reg_out = b_reg_out;
 
   // 比较器 + 减法器
   assign is_a_lt_b = (a_reg_out < b_reg_out);
@@ -366,10 +365,24 @@ set_output_delay [expr $clk_period * $clk_io_pct] -clock $clk_name [all_outputs]
 ### grid_strategy-M1-M4-M7.tcl（PDN 策略）
 
 ```tcl
-define_pdn_grid -name grid -pins {metal4}
-add_pdn_stripe -grid grid -layer metal4 -width 0.24 -pitch 14.0 -offset 1
-add_pdn_stripe -grid grid -layer metal7 -width 0.70 -pitch 8.0 -offset 1
-add_pdn_connect -grid grid -layers {metal4 metal7}
+# 全局连接
+add_global_connection -net {VDD} -inst_pattern {.*} -pin_pattern {^VDD$} -power
+add_global_connection -net {VDD} -inst_pattern {.*} -pin_pattern {^VDDPE$}
+add_global_connection -net {VDD} -inst_pattern {.*} -pin_pattern {^VDDCE$}
+add_global_connection -net {VSS} -inst_pattern {.*} -pin_pattern {^VSS$} -ground
+add_global_connection -net {VSS} -inst_pattern {.*} -pin_pattern {^VSSE$}
+global_connect
+
+# 电压域
+set_voltage_domain -name {CORE} -power {VDD} -ground {VSS}
+
+# 电源网格
+define_pdn_grid -name {grid} -voltage_domains {CORE}
+add_pdn_stripe -grid {grid} -layer {metal1} -width {0.17} -pitch {2.4} -offset {0} -followpins
+add_pdn_stripe -grid {grid} -layer {metal4} -width {0.48} -pitch {28.0} -offset {2}
+add_pdn_stripe -grid {grid} -layer {metal7} -width {1.40} -pitch {15.0} -offset {2}
+add_pdn_connect -grid {grid} -layers {metal1 metal4}
+add_pdn_connect -grid {grid} -layers {metal4 metal7}
 ```
 
 ---
@@ -421,13 +434,15 @@ openroad -no_init
 # 必须先加载 liberty
 read_liberty /OpenROAD-flow-scripts/flow/platforms/nangate45/lib/NangateOpenCellLibrary_typical.lib
 
-# 加载设计
-read_db /work/results/nangate45/gcd/base/5_route.odb
-read_sdc /work/results/nangate45/gcd/base/5_route.sdc
+# 加载最终设计（签核精度）
+read_db /work/results/nangate45/gcd/base/6_final.odb
+read_sdc /work/results/nangate45/gcd/base/6_final.sdc
 
 # 设置 RC 模型
 source /OpenROAD-flow-scripts/flow/platforms/nangate45/setRC.tcl
-estimate_parasitics -global_routing
+
+# 加载 SPEF 寄生参数（签核精度，比 estimate_parasitics 更准确）
+read_spef /work/results/nangate45/gcd/base/6_final.spef
 
 # 时序报告
 report_tns

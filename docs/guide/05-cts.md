@@ -57,8 +57,10 @@ Clock core_clock
 ### 时钟缓冲器
 
 GCD 设计的时钟树使用了 CLKBUF_X3 缓冲器，形成两级结构：
-- 根节点：1 个 CLKBUF_X3
-- 第二级：4 个 CLKBUF_X3
+- 根节点：1 个 CLKBUF_X3（clkbuf_0_clk）
+- 第二级：4 个 CLKBUF_X3（clkbuf_2_0 ~ clkbuf_2_3）
+- 负载缓冲：1 个 CLKBUF_X1（clkload2）
+- 共计 6 个时钟缓冲器
 
 ## 输出文件
 

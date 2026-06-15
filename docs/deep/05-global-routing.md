@@ -93,8 +93,8 @@ read_db /work/results/nangate45/gcd/base/4_cts.odb
 # 运行全局布线
 global_route -guide_file /work/results/nangate45/gcd/base/route.guide
 
-# 查看拥塞报告
-report_congestion
+# 注意：OpenROAD 没有 report_congestion 命令
+# 拥塞信息在全局布线日志中查看（见下方 bash 命令）
 ```
 
 ### 查看拥塞数据
